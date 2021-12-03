@@ -1,9 +1,10 @@
 module.exports = {
-	HOST: "localhost",
-	USER: "root",
-	PASSWORD: "123",
+	HOST: "mysql-60434-0.cloudclusters.net",
+	USER: "admin",
+	PASSWORD: "Dedekganteng20",
 	DB: "app_tracking",
 	dialect: "mysql",
+	PORT: '10007',
 	pool: {
 		max: 5,
 		min: 0,
