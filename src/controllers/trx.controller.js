@@ -3,7 +3,10 @@ const config = require("../../config/auth.config");
 const Websites = db.websites;
 const Trx = db.trx;
 const Tracking = db.tracking;
+
+const upload = require("../middleware/uploads");
 var moment = require('moment');
+const { tracking } = require("../models");
 
 exports.get = (req, res) => {
     Trx.findAll().then(trx => {
@@ -28,27 +31,62 @@ exports.get = (req, res) => {
 
 exports.postTracking = (req, res) => {
     const today = moment().format();
-   var time = (today.replace(/T/, ' ').replace(/\..+/, '').replace("+07:00", ""))
-    Tracking.create({
+    var time = (today.replace(/T/, ' ').replace(/\..+/, '').replace("+07:00", ""))
 
-        id_user: req.userId,
-        lat: req.body.lat,
-        lng: req.body.lng,
-        time: time
-    }).then(tracking => {
-        if (!tracking) {
-            return res.status(400).send({
-                code: 400,
-                message: "Transaction Not Saved !!",
-                data: null
+    Tracking.findAll({
+        where: {
+            id_user: req.userId
+        }, limit: 1, order: [['time', 'DESC']]
+    }).then(findTracking => {
+        console.log(findTracking)
+        if (findTracking.length != 0) {
+            Tracking.update({
+                lat: req.body.lat,
+                lng: req.body.lng,
+                time: time
+            }, {
+                where: {
+                    id_user: req.userId,
+                }
+            }).then(track => {
+                if (!track) {
+                    return res.status(400).send({
+                        code: 400,
+                        message: "Tracking Not Updated",
+                        data: null
+                    })
+                }
+
+                return res.status(200).send({
+                    code: 200,
+                    message: "Success Update Tracking",
+                    data: track
+                })
+            })
+
+        } else {
+            Tracking.create({
+                id_user: req.userId,
+                lat: req.body.lat,
+                lng: req.body.lng,
+                time: time
+            }).then(tracking => {
+                if (!tracking) {
+                    return res.status(400).send({
+                        code: 400,
+                        message: "Transaction Not Saved !!",
+                        data: null
+                    })
+                }
+                return res.status(200).send({
+                    code: 200,
+                    message: "Success Save Transaction",
+                    data: tracking
+                })
             })
         }
-        return res.status(200).send({
-            code: 200,
-            message: "Success Save Transaction",
-            data: tracking
-        })
-    })
+    });
+
 
 }
 exports.post = (req, res) => {
@@ -116,35 +154,37 @@ exports.post = (req, res) => {
 
 exports.getLastTracking = async (req, res) => {
     var idUser = ""
-    if(req.params.idUser){
-        idUser=req.params.idUser
+    if (req.params.idUser) {
+        idUser = req.params.idUser
     }
-    Tracking.findAll({ where: {
-        id_user:idUser
-    }, limit: 1 ,order: [['time', 'DESC']]}).then(data=>{
+    Tracking.findAll({
+        where: {
+            id_user: idUser
+        }, limit: 1, order: [['time', 'DESC']]
+    }).then(data => {
         console.log(data.length)
-        if(!data){
-          return  res.status(200).send({
+        if (!data) {
+            return res.status(200).send({
                 code: 200,
                 data: data,
                 message: "Success Get Users Tracking"
             });
         }
-        if(data.length == 0){
-          return  res.status(400).send({
+        if (data.length == 0) {
+            return res.status(400).send({
                 code: 400,
                 data: null,
                 message: "Success Get Users Tracking"
             });
         }
-        Websites.findOne().then(sources=>{
+        Websites.findOne().then(sources => {
             console.log(sources)
-           
-         var dataTracking = {
-             destination:{lat:data[0].lat,lng:data[0].lng},
-             source:{lat:sources.lat,lng:sources.lang}
+
+            var dataTracking = {
+                destination: { lat: data[0].lat, lng: data[0].lng },
+                source: { lat: sources.lat, lng: sources.lang }
             }
-           return res.status(200).send({
+            return res.status(200).send({
                 code: 200,
                 data: dataTracking,
                 message: "Success Get User Tracking"
@@ -156,7 +196,7 @@ exports.getLastTracking = async (req, res) => {
         //     data: data,
         //     message: "Success Get User Tracking"
         // });
-      
+
     })
 
 

@@ -1,8 +1,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-
 const app = express();
+global.__basedir = __dirname;
+app.use(express.static('public')); 
+app.use('/uploads', express.static('uploads'));
 
 process.env.TZ = 'Asia/Jakarta' 
 var corsOptions = {
@@ -30,6 +32,7 @@ require('./src/routes/auth.routes')(app);
 require('./src/routes/user.routes')(app);
 require('./src/routes/outlet.routes')(app);
 require('./src/routes/transaction.routes')(app);
+require('./src/routes/images.routes')(app);
 // simple route
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to backend app telkomsel application." });

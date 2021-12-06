@@ -1,6 +1,7 @@
 const { authJwt } = require("../middleware");
 const controller = require("../controllers/trx.controller");
 const prefix = "v1"
+
 module.exports = function (app) {
     app.use(function (req, res, next) {
         res.header(

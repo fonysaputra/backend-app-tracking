@@ -16,10 +16,10 @@ exports.get = (req, res) => {
               
             nama_outlet: {
                   [Op.like]: "%"+search+"%"
-                }
-              
-            
-           }
+                },
+         
+                          
+           },   order: [['updatedAt', 'DESC']]
     }).then(outlet => {
         if (!outlet) {
             return res.status(400).send({
@@ -137,6 +137,7 @@ exports.patchStatus = (req, res) => {
             message: "Success Update Status",
             data: {status:outlet.status_aktif, idUser : req.userId}
         })
+  
     }).catch(err => {
         res.status(500).send({
             code: 500,
